@@ -1,0 +1,165 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+import uvicorn
+from inference_engine import generate_arctos_response
+
+app = FastAPI(title="ARCTOS Backend")
+
+class ChatRequest(BaseModel):
+    message: str
+
+class ChatResponse(BaseModel):
+    response: str
+    sources: list
+    confidence: float
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_endpoint(payload: ChatRequest):
+    result = generate_arctos_response(payload.message)
+    return result
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+import random
+
+# Tactical system prompt
+SYSTEM_PROMPT = """
+You are ARCTOS — a neutral, fact-first AI model. 
+You respond:
+- Without emotion
+- Without bias
+- Without opinion
+- Using verified data only
+- With clarity and directness
+If data is weak, say so. If there is no source, say “No verified source found.”
+Tone: calm, young male, tactical, mission-focused.
+"""
+
+def generate_arctos_response(user_message: str):
+    """
+    Simulated response logic — replace with real Mixtral call later.
+    """
+
+    # Fake response logic for MVP
+    response_text = f"ARCTOS response to: {user_message}. No model backend is connected yet, but framework is ready."
+    
+    return {
+        "response": response_text,
+        "sources": ["Framework placeholder"],
+        "confidence": round(random.uniform(0.6, 0.99), 2)
+    }
+MODEL_PATH=/models/mixtral-8x7b
+API_KEY=YOUR_KEY_HERE
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: arctos_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    container_name: arctos_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+import { useState } from 'react';
+
+export default function Home() {
+  const [input, setInput] = useState("");
+  const [response, setResponse] = useState("");
+
+  async function sendMessage() {
+    const res = await fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: input })
+    });
+
+    const data = await res.json();
+    setResponse(data.response);
+  }
+
+  return (
+    <div style={{
+      backgroundColor: "#0b0f14",
+      color: "white",
+      minHeight: "100vh",
+      padding: "40px",
+      fontFamily: "Arial"
+    }}>
+      <div style={{ textAlign: "center" }}>
+        <img 
+          src="/arctos_logo.png" 
+          alt="ARCTOS Logo" 
+          style={{ width: "180px", opacity: 0.9 }}
+        />
+        <h1>ARCTOS</h1>
+        <p>Neutral. Tactical. Fact-based.</p>
+      </div>
+
+      <div style={{ marginTop: "40px", textAlign: "center" }}>
+        <input
+          style={{ width: "60%", padding: "12px", fontSize: "18px" }}
+          placeholder="Ask ARCTOS..."
+          onChange={e => setInput(e.target.value)}
+        />
+        <button 
+          style={{ padding: "12px 20px", marginLeft: "10px" }}
+          onClick={sendMessage}>
+          Send
+        </button>
+      </div>
+
+      {response && (
+        <div style={{
+          marginTop: "40px",
+          background: "#111922",
+          padding: "20px",
+          borderRadius: "8px"
+        }}>
+          <h3>Response:</h3>
+          <p>{response}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+# ARCTOS Manifesto
+
+ARCTOS is built on three principles:
+
+1. **Fact First** — Nothing above verified information.
+2. **Neutrality** — No ideology, no bias, no emotional framing.
+3. **Clarity** — Tactical communication. Minimal words, maximum signal.
+
+Tone:
+- Young but disciplined.
+- Calm, direct, operational.
+- No speculation beyond data.
+# ARCTOS — Tactical Fact-First AI
+
+ARCTOS is a neutral, fact-first AI system built on the Mixtral 8x7B architecture (or any model you plug in).
+
+## Features
+- Clean FastAPI backend
+- Tactical interface (Next.js)
+- Voice asset included
+- Docker ready
+- Modular for future upgrades
+
+## Run locally
+1. Install Docker & Docker Compose.
+2. Run:
+MIT License
+
+Copyright (c) 2025 
+
+Permission is hereby granted...
